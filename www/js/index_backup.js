@@ -63,12 +63,13 @@ function deviceReady() {
                         <h1>' + question.text + '</h1>\
                     </div>\
                     <div class="yes-and-no">\
-                        <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + question.index + '">yes</a>\
+                        <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + question.index + '">\
+                            yes</a>\
                         <a href="#" class="no ui-btn ui-btn-inline" data-index="' + question.index + '">no</a>\
-                        '+question.comment.length+' comments\
                     </div>\
                 </div>\
             </div>');
+
         index++;
     });
 
@@ -83,10 +84,19 @@ function deviceReady() {
                 <h1>'+ questions[i].text + '</h1>\
                 <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + questions[i].index + '">yes</a>\
                 <a href="#" class="no ui-btn ui-btn-inline" data-index="' + questions[i].index + '">no</a>\
-                '+questions[i].comment.length+' comments\
-            </div>\
-            <div class="question-comments-area"></div>');
-        newComment(questions[i].index);
+                <div class="question-comments-area">\
+                    <div class="new-comment-field">\
+                        <form method="get" action="">\
+                            <fieldset class="ui-field-contain">\
+                                <label for="basicfield" class="ui-hidden-accessible">Your comment</label>\
+                                <textarea id="my-comment" placeholder="My comment"></textarea>\
+                            </fieldset>\
+                            <a href="#" id="comment-button" class="ui-btn"  data-index="' + questions[i].index + '">submit</a>\
+                       </form>\
+                    </div>\
+                </div>\
+            </div>');
+
         showComments(questions[i].comment.length, questions[i].comment);
         //console.log('comments: ' + questions[i].comment);
         return false;
@@ -99,7 +109,6 @@ function deviceReady() {
         console.log("New comment: " + nComm);
         console.log("index: " + i);
         questions[i].comment.push(nComm);
-        newComment(questions[i].index);
         showComments(questions[i].comment.length, questions[i].comment);
     });
 
@@ -110,7 +119,6 @@ function deviceReady() {
         console.log(questions[i]);
         questions[i].yes++;
         console.log(questions[i].yes);
-        $(this).find('.yes-num').html(questions[i].yes);
     });
 
     // increase # of no
@@ -119,7 +127,6 @@ function deviceReady() {
         console.log(questions[i]);
         questions[i].no++;
         console.log(questions[i].no);
-        $(this).find('.no-num').html(questions[i].no);
     });
 
 }
@@ -139,31 +146,17 @@ function onSuccess(position){
             //mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
-    //var mapCenter = document.getElementById("map");
+    var mapCenter = document.getElementById("map");
 
     var map = new google.maps.Map(document.getElementById("map"), mapOptions);
     // document.getElementById("map").innerHTML = map;
 
     var marker = new google.maps.Marker({
-        position: map.getCenter(),
+        position: mapCenter.getCenter(),
         map: map,
         title: 'my location'
     });
 
-    google.maps.event.trigger(map, 'resize');
-
-
-   function markerCoords(markerobject){
-        google.maps.event.addListener(markerobject, 'dragend', function(evt){
-            infoWindow.setOptions({
-                content: '<p>Marker dropped: Current Lat: ' + evt.latLng.lat().toFixed(3) + ' Current Lng: ' + evt.latLng.lng().toFixed(3) + '</p>'
-            });
-            infoWindow.open(map, markerobject);
-        });
-
-        google.maps.event.addListener(markerobject, 'drag', function(evt){
-            console.log("marker is being dragged");
-        }); 
     // google.maps.event.addListener(map, 'center_changed', function() {
     //             // 0.1 seconds after the center of the map has changed,
     //             // set back the marker position.
@@ -172,9 +165,6 @@ function onSuccess(position){
     //               marker.setPosition(center);
                 
     // });
-
-
-
     alert("Your location " + latLong);
     var newQuestion = new Question();
 }
@@ -183,25 +173,11 @@ function onFail(message){
     alert('code: ' + error.code + '\n' + 'message' + error.message + '\n');
 }
 
-function newComment(index){
-    $('#pg-question-single .question-comments-area').html(
-        '<div class="new-comment-field">\
-            <form method="get" action="">\
-                <fieldset class="ui-field-contain">\
-                    <label for="basicfield" class="ui-hidden-accessible">Your comment</label>\
-                    <textarea id="my-comment" placeholder="My comment"></textarea>\
-                </fieldset>\
-                <a href="#" id="comment-button" class="ui-btn"  data-index="' + index + '">submit</a>\
-           </form>\
-            </div>\
-        </div>');
-}
-
 function showComments(commentLength, comments){
     console.log(commentLength + ',' + comments);
     var comm = '';
     if (commentLength > 0) {        
-        for (var i = commentLength-1; i >= 0; i--) {
+        for (var i = 0; i < commentLength; i++) {
             comm += '<p>' + comments[i] + '</p>';           
         }
     } else {
@@ -209,10 +185,6 @@ function showComments(commentLength, comments){
         }
 
         $('.ppls-comments').html(comm);
-}
-
-function updateYesAndNo(){
-
 }
 
 

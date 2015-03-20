@@ -13,17 +13,54 @@
     </head>
     <body>
         <div id="myContent">
+            <!-- all questions page-->
+            <section data-role="page" id="pg-question-list">
+                <div class="ui-content">
+                    <div id="question-list">
+                        <!-- add question here -->
+                           <!--  <div class="question-area">
+                                <div class="question-all" data-index="' + question.index + '">
+                                    <div class="question-all-text">
+                                        <h1> + question.text + </h1>
+                                    </div>
+                                    <div class="yes-and-no">
+                                        <a href="#" id="yes" class="ui-btn ui-btn-inline">yes</a>
+                                        <a href="#" id="no" class="ui-btn ui-btn-inline">no</a>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                    </div>
+                    <!-- <a href="#" id="question-all" class="question-list"></a> -->
+                    <a href="#pg-new-question" id="question-new" class="ui-btn">new question</a>
+                </div>
+            </section>
+
+            <!-- single question page-->
+            <section data-role="page" id="pg-question-single">
+                <div class="ui-content">
+                    <div class="question-details">
+                        <!-- add question details here-->                    
+                    </div>
+                    <div class="ppls-comments">
+                        <!-- all comments goes here -->
+                    </div>
+                    <a href="#pg-question-list" class="ui-btn">back</a>
+                </div>
+            </section>
+
+            <!--- NEW QUESTION -->
             <!-- input new question page-->
             <section data-role="page" id="pg-new-question">
                 <div class="ui-content">
                    <!--  <div class="question-input-area ui-field-contain ui-hidden-accessible"> </div>-->
-                   <form method="get" action="">
+                   <!-- <form method="get" action="">
                     <fieldset class="ui-field-contain">
                         <label for="basicfield" class="ui-hidden-accessible">Your question</label>
                         <textarea id="my-question" placeholder="My question"></textarea>
                     </fieldset>
                     <a href="#pg-question-location" id="question-button" class="ui-btn">next</a>
-                   </form>
+                   </form> -->
                 </div>
             </section>
 
@@ -46,36 +83,7 @@
                     <a href="#pg-question-list" id="save-button" class="ui-btn">done</a>
                 </div>
             </section>
-
-            <!-- all questions page-->
-            <section data-role="page" id="pg-question-list">
-                <div class="ui-content">
-                    <div id="question-list">
-                        <!-- add question here -->
-                        <!-- <div class="question-area">
-                            <div class="question-all" data-index="">
-                                <h1></h1>
-                            </div>
-                            <div class="yes-and-no">
-                                <a href="#" id="yes" class="ui-btn ui-btn-inline">yes</a>
-                                <a href="#" id="no" class="ui-btn ui-btn-inline">no</a>
-                            </div>
-                        </div>  -->                                        
-                    </div>
-                    <!-- <a href="#" id="question-all" class="question-list"></a> -->
-                    <a href="#pg-new-question" class="ui-btn">new question</a>
-                </div>
-            </section>
-
-            <!-- sinle question page-->
-            <section data-role="page" id="pg-question-single">
-                <div class="ui-content">
-                    <div class="question-details">
-                        <!-- add question details here-->                                          
-                    </div>
-                    <a href="#pg-question-list" class="ui-btn">back</a>
-                </div>
-            </section>
+        
         </div>
 
 
