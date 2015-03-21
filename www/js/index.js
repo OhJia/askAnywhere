@@ -43,10 +43,13 @@ function deviceReady() {
     //console.log("deviceready");
     $(document).on('click', '#question-button', function(){
     // $('#question-button').click(function(){
-            alert("triggered map");
-            navigator.geolocation.getCurrentPosition(onSuccess, onFail);
-            // get value from textfield
-            questionText = $('#my-question').val();
+        //alert("triggered map");        
+        // get value from textfield
+        questionText = $('#my-question').val();
+    });
+
+    $(document).on("pageshow", "#pg-question-location", function(){
+        navigator.geolocation.getCurrentPosition(onSuccess, onFail);
     });
 
 
@@ -65,11 +68,21 @@ function deviceReady() {
                     <div class="yes-and-no">\
                         <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + question.index + '">yes</a>\
                         <a href="#" class="no ui-btn ui-btn-inline" data-index="' + question.index + '">no</a>\
-                        '+question.comment.length+' comments\
                     </div>\
+                    <div class="comment-count" data-index="' + question.index + '"></div>\
                 </div>\
             </div>');
         index++;
+    });
+    
+    // update comment count when #pg-question-list shows
+    $(document).on("pageshow", "#pg-question-list", function(){
+    // $('#pg-question-list').on('load', function(){
+        for (var i = 0; i < questions.length; i++){
+                $('.comment-count[data-index="' + i + '"]').html(questions[i].comment.length + ' comments');
+                console.log('comment Index '+ i + ',comment count: ' + questions[i].comment.length);
+            
+        }              
     });
 
     // open single question 
@@ -83,9 +96,13 @@ function deviceReady() {
                 <h1>'+ questions[i].text + '</h1>\
                 <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + questions[i].index + '">yes</a>\
                 <a href="#" class="no ui-btn ui-btn-inline" data-index="' + questions[i].index + '">no</a>\
-                '+questions[i].comment.length+' comments\
             </div>\
+            <div class="comment-count"></div>\
+            <div id="question-map"></div>\
             <div class="question-comments-area"></div>');
+        $('.comment-count').html(questions[i].comment.length + ' comments');
+
+        showQuestionMap(questions[i].location);
         newComment(questions[i].index);
         showComments(questions[i].comment.length, questions[i].comment);
         //console.log('comments: ' + questions[i].comment);
@@ -101,6 +118,7 @@ function deviceReady() {
         questions[i].comment.push(nComm);
         newComment(questions[i].index);
         showComments(questions[i].comment.length, questions[i].comment);
+        $('.comment-count').html(questions[i].comment.length + ' comments');
     });
 
 
@@ -135,52 +153,30 @@ function onSuccess(position){
     var mapOptions = {
             center: latLong,
             zoom: 16,
-            disableDefaultUI: true
-            //mapTypeId: google.maps.MapTypeId.ROADMAP
+            disableDefaultUI: true,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
-    //var mapCenter = document.getElementById("map");
-
     var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    // document.getElementById("map").innerHTML = map;
 
-    var marker = new google.maps.Marker({
-        position: map.getCenter(),
-        map: map,
-        title: 'my location'
+    $('<div/>').addClass('centerMarker').appendTo(map.getDiv());
+
+    google.maps.event.addListener(map, 'dragend', function() {
+        center = map.getCenter();
+        console.log(center);
+        updateLocation(center);
     });
 
-    google.maps.event.trigger(map, 'resize');
-
-
-   function markerCoords(markerobject){
-        google.maps.event.addListener(markerobject, 'dragend', function(evt){
-            infoWindow.setOptions({
-                content: '<p>Marker dropped: Current Lat: ' + evt.latLng.lat().toFixed(3) + ' Current Lng: ' + evt.latLng.lng().toFixed(3) + '</p>'
-            });
-            infoWindow.open(map, markerobject);
-        });
-
-        google.maps.event.addListener(markerobject, 'drag', function(evt){
-            console.log("marker is being dragged");
-        }); 
-    // google.maps.event.addListener(map, 'center_changed', function() {
-    //             // 0.1 seconds after the center of the map has changed,
-    //             // set back the marker position.
-                
-    //               var center = mapCenter.getCenter();
-    //               marker.setPosition(center);
-                
-    // });
-
-
-
-    alert("Your location " + latLong);
-    var newQuestion = new Question();
+    //alert("Your location " + latLong);
 }
 
 function onFail(message){
     alert('code: ' + error.code + '\n' + 'message' + error.message + '\n');
+}
+
+function updateLocation(position) {
+    latLong = new google.maps.LatLng(position.lat(), position.lng());
+    console.log('new latLong: '+latLong);
 }
 
 function newComment(index){
@@ -211,9 +207,18 @@ function showComments(commentLength, comments){
         $('.ppls-comments').html(comm);
 }
 
-function updateYesAndNo(){
+function showQuestionMap(qLatLong){
+    var mapOptions = {
+        zoom: 16,
+        center: qLatLong
+    };
 
+    var map = new google.maps.Map(document.getElementById('question-map'),mapOptions);
+    console.log('question mapOptions: '+mapOptions);
 }
+
+
+
 
 
 
