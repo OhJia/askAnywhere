@@ -1,3 +1,6 @@
+Parse.initialize("Ljr2dQpbEZnH3mw1RImWBlsiFWdZzB7eUyuEZGms", "GcX4fuwjHRIS7ArKy0sie6szsMguAs7MgLYqwgLi");
+
+
 var questions = []; //store all question objects
 var index = 0; //keep track of number of questions in array
 
@@ -5,10 +8,9 @@ var questionText; //a single question's text
 var latLong; //a single question's location
 
 
-function Question(t, loc, i, map) {
+function Question(t, loc, i) {
     this.text = t;
     this.location = loc;
-    this.map= map;
     this.yes = 0;
     this.no = 0;
     this.comment = [];
@@ -18,6 +20,13 @@ function Question(t, loc, i, map) {
 function init(){
     //This will run when the page is ready
     alert("init");
+
+
+    var TestObject = Parse.Object.extend("TestObject");
+    var testObject = new TestObject();
+    testObject.save({foo: "bar"}).then(function(object) {
+      alert("yay! it worked");
+    });
     
     //document.getElementById('myContent').innerHTML = "init";
     //Run device ready when phonegap is loaded
@@ -93,20 +102,28 @@ function deviceReady() {
         $.mobile.changePage('#pg-question-single');
 
          $('#pg-question-single .question-details').html(
-            '<div class="question-single-all">\
+            '<div id="question-map" data-index="' + questions[i].index + '"></div>\
+            <div class="question-single-all">\
                 <h1>'+ questions[i].text + '</h1>\
                 <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + questions[i].index + '">yes</a>\
                 <a href="#" class="no ui-btn ui-btn-inline" data-index="' + questions[i].index + '">no</a>\
             </div>\
             <div class="comment-count"></div>\
-            <div class="question-map"></div>\
             <div class="question-comments-area"></div>');
         $('.comment-count').html(questions[i].comment.length + ' comments');
-        //showMap(questions[i]);
+
+        //showQuestionMap(questions[i].location);
         newComment(questions[i].index);
         showComments(questions[i].comment.length, questions[i].comment);
         //console.log('comments: ' + questions[i].comment);
         return false;
+    });
+    
+    // show map when #pg-question-single shows
+    $(document).on("pageshow", "#pg-question-single", function(){
+        var index = $('#question-map').attr('data-index');
+        showQuestionMap(questions[index].location);
+        console.log('question location: '+ questions[index].location );
     });
 
     // add to a question's comments
@@ -167,7 +184,7 @@ function onSuccess(position){
         updateLocation(center);
     });
 
-    alert("Your location " + latLong);
+    //alert("Your location " + latLong);
 }
 
 function onFail(message){
@@ -207,21 +224,25 @@ function showComments(commentLength, comments){
         $('.ppls-comments').html(comm);
 }
 
-// function showMap(question){
-//     console.log('question location: '+question.location);
-//     var mapOptions = {
-//             center: question.location,
-//             zoom: 16,
-//             disableDefaultUI: true,
-//             mapTypeId: google.maps.MapTypeId.ROADMAP
+function showQuestionMap(qLatLong){
+    var mapOptions = {
+        zoom: 16,
+        center: qLatLong,
+        disableDefaultUI: true
+    };
 
-//     };
+    var map = new google.maps.Map(document.getElementById('question-map'),mapOptions);
+
+    var marker = new google.maps.Marker({
+      position: qLatLong,
+      map: map,
+      //title: 'Hello World!'
+    });
+
+    //console.log('question mapOptions: '+mapOptions);
+}
 
 
-//     var map = new google.maps.Map(document.getElementById("question-map"), mapOptions);
-
-//     $('<div/>').addClass('centerMarker').appendTo(map.getDiv());
-// }
 
 
 

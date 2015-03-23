@@ -138,3 +138,8 @@ h1 {
   width:20px;
   cursor:pointer;
 }
+
+#question-map {
+    height: 100px;
+    width: 100%;
+}
