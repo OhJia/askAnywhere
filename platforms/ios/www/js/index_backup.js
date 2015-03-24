@@ -1,41 +1,37 @@
 Parse.initialize("Ljr2dQpbEZnH3mw1RImWBlsiFWdZzB7eUyuEZGms", "GcX4fuwjHRIS7ArKy0sie6szsMguAs7MgLYqwgLi");
 
 
-var questions = []; //store all question objects
-var index = 0; //keep track of number of questions in array
-
 var questionText; //a single question's text
 var latLong; //a single question's location
 
 
-function Question(t, loc, i) {
-    this.text = t;
-    this.location = loc;
-    this.yes = 0;
-    this.no = 0;
-    this.comment = [];
-    this.index = i;
-}
+var Question = Parse.Object.extend("Question");
+var query = new Parse.Query(Question);
+
+var Comment = Parse.Object.extend("Comment");
+var queryComm = new Parse.Query(Comment);
+
+var resultQuestion;
+var par;
+
 
 function init(){
     //This will run when the page is ready
-    alert("init");
+    alert("init");  
 
-
-    var TestObject = Parse.Object.extend("TestObject");
-    var testObject = new TestObject();
-    testObject.save({foo: "bar"}).then(function(object) {
-      alert("yay! it worked");
-    });
     
-    //document.getElementById('myContent').innerHTML = "init";
+    
     //Run device ready when phonegap is loaded
     document.addEventListener("deviceready", deviceReady, false);
 }
 
 function deviceReady() {
                 //Run any Phonegap specific code here
-    alert("deviceready");
+    alert("device is ready");
+
+    // $(document).on("pageshow", "#pg-question-list", function(){
+    //     loadAllQuestions();
+    // });
 
     // start new question
     $('#question-new').click(function(){
@@ -49,15 +45,12 @@ function deviceReady() {
             </form>');
     });
 
-    //document.getElementById('myContent').innerHTML = "deviceready";
-    //console.log("deviceready");
     $(document).on('click', '#question-button', function(){
-    // $('#question-button').click(function(){
-        //alert("triggered map");        
         // get value from textfield
         questionText = $('#my-question').val();
     });
 
+    //when #pg-question-location shows, get geolocation
     $(document).on("pageshow", "#pg-question-location", function(){
         navigator.geolocation.getCurrentPosition(onSuccess, onFail);
     });
@@ -65,96 +58,118 @@ function deviceReady() {
 
     // create and save new question
     $('#save-button').click(function(){
-        alert("saved question");
-        var question = new Question(questionText, latLong, index);
-        questions.push(question);
-        console.log(questions);
-        $('#question-list').append(
-            '<div class="question-area">\
-                <div class="question-all" data-index="' + question.index + '">\
-                    <div class="question-all-text" data-index="' + question.index + '">\
-                        <h1>' + question.text + '</h1>\
-                    </div>\
-                    <div class="yes-and-no">\
-                        <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + question.index + '">yes</a>\
-                        <a href="#" class="no ui-btn ui-btn-inline" data-index="' + question.index + '">no</a>\
-                    </div>\
-                    <div class="comment-count" data-index="' + question.index + '"></div>\
-                </div>\
-            </div>');
-        index++;
+        var question = new Question();
+
+        question.save({
+            text: questionText,
+            location: latLong,
+            yes: 0,
+            no: 0, 
+            comments: 0          
+        }).then(function(object) {
+            alert("yay! question " +question.id+ "saved.");
+        });        
+        console.log(question);
     });
     
-    // update comment count when #pg-question-list shows
+    // when #pg-question-list shows, show all questions
     $(document).on("pageshow", "#pg-question-list", function(){
-    // $('#pg-question-list').on('load', function(){
-        for (var i = 0; i < questions.length; i++){
-                $('.comment-count[data-index="' + i + '"]').html(questions[i].comment.length + ' comments');
-                console.log('comment Index '+ i + ',comment count: ' + questions[i].comment.length);
-            
-        }              
+        loadAllQuestions();
     });
+
 
     // open single question 
     $(document).on('tap', '.question-all-text', function(){ //for elements appended to html
-        var i = $(this).attr('data-index');
-        console.log(questions[i]);
-        $.mobile.changePage('#pg-question-single');
+        var qID = $(this).attr('data-id');
+        $.mobile.changePage( $('#pg-question-single') );
+        console.log("opening: " + qID);
 
-         $('#pg-question-single .question-details').html(
-            '<div id="question-map" data-index="' + questions[i].index + '"></div>\
-            <div class="question-single-all">\
-                <h1>'+ questions[i].text + '</h1>\
-                <a href="#" class="yes ui-btn ui-btn-inline" data-index="' + questions[i].index + '">yes</a>\
-                <a href="#" class="no ui-btn ui-btn-inline" data-index="' + questions[i].index + '">no</a>\
-            </div>\
-            <div class="comment-count"></div>\
-            <div class="question-comments-area"></div>');
-        $('.comment-count').html(questions[i].comment.length + ' comments');
+        var q = new Parse.Query(Question);
+        //console.log(q);
 
-        //showQuestionMap(questions[i].location);
-        newComment(questions[i].index);
-        showComments(questions[i].comment.length, questions[i].comment);
-        //console.log('comments: ' + questions[i].comment);
+        q.get(qID, {
+            success: function(results){
+                console.log(results);
+                resultQuestion = results;
+                 $('#pg-question-single .question-details').html(
+                    '<div id="question-map" data-id="' + qID + '"></div>\
+                    <div class="question-single-all">\
+                        <h1>'+ results.attributes.text + '</h1>\
+                        <a href="#" class="yes ui-btn ui-btn-inline" data-id="' + qID + '">yes</a>\
+                        <a href="#" class="no ui-btn ui-btn-inline" data-id="' + qID + '">no</a>\
+                    </div>\
+                    <div class="comment-count"></div>\
+                    <div class="question-comments-area"></div>');
+                 showQuestionMap(results.attributes.location.k, results.attributes.location.D);
+                 newComment(results.id);
+                 showComments(resultQuestion);
+            },
+            error: function(object, error){
+                alert("Error: " + error.code + " " + error.message);
+            }
+        });
         return false;
     });
     
-    // show map when #pg-question-single shows
-    $(document).on("pageshow", "#pg-question-single", function(){
-        var index = $('#question-map').attr('data-index');
-        showQuestionMap(questions[index].location);
-        console.log('question location: '+ questions[index].location );
-    });
-
-    // add to a question's comments
+    // create new comment object after submitting a new comment
     $(document).on('click', '#comment-button', function(){
-        var i = $(this).attr('data-index');
         var nComm = $('#my-comment').val();
         console.log("New comment: " + nComm);
-        console.log("index: " + i);
-        questions[i].comment.push(nComm);
-        newComment(questions[i].index);
-        showComments(questions[i].comment.length, questions[i].comment);
-        $('.comment-count').html(questions[i].comment.length + ' comments');
+
+        var comment = new Comment();
+        comment.save({
+            text: nComm,
+            parent: resultQuestion        
+        }).then(function(object) {
+            alert("yay! comment " +comment.attributes.text+ " saved.");
+        });   
+        // add to # of comments
+        resultQuestion.increment("comments");
+        resultQuestion.save();  
+        // clear comment text field                     
+        newComment(resultQuestion.id);
+        // query for comments that are children of this question, display them
+        par = comment.get("parent");
+        showComments(par);
     });
 
 
     // increase # of yes
     $(document).on('click', '.yes', function(){
-        var i = $(this).attr('data-index');
-        console.log(questions[i]);
-        questions[i].yes++;
-        console.log(questions[i].yes);
-        $(this).find('.yes-num').html(questions[i].yes);
+         var qID = $(this).attr('data-id');
+         console.log(qID);
+
+        var q = new Parse.Query(Question);
+
+        q.get(qID, {
+            success: function(results){
+                results.increment("yes");
+                results.save();
+                console.log(results);
+            },
+            error: function(object, error){
+                alert("Error: " + error.code + " " + error.message);
+            }
+        });
     });
 
     // increase # of no
     $(document).on('click', '.no', function(){
-        var i = $(this).attr('data-index');
-        console.log(questions[i]);
-        questions[i].no++;
-        console.log(questions[i].no);
-        $(this).find('.no-num').html(questions[i].no);
+         var qID = $(this).attr('data-id');
+         console.log(qID);
+
+        var q = new Parse.Query(Question);
+
+        q.get(qID, {
+            success: function(results){
+                results.increment("no");
+                results.save();
+                console.log(results);
+            },
+            error: function(object, error){
+                alert("Error: " + error.code + " " + error.message);
+            }
+        });
     });
 
 }
@@ -187,6 +202,7 @@ function onSuccess(position){
     //alert("Your location " + latLong);
 }
 
+
 function onFail(message){
     alert('code: ' + error.code + '\n' + 'message' + error.message + '\n');
 }
@@ -210,36 +226,91 @@ function newComment(index){
         </div>');
 }
 
-function showComments(commentLength, comments){
-    console.log(commentLength + ',' + comments);
-    var comm = '';
-    if (commentLength > 0) {        
-        for (var i = commentLength-1; i >= 0; i--) {
-            comm += '<p>' + comments[i] + '</p>';           
-        }
-    } else {
-            comm ='<p>Be the first to comment.</p>';
-        }
+function showComments(par){
+    queryComm.equalTo("parent", par);
 
-        $('.ppls-comments').html(comm);
+        queryComm.find({
+            success: function(results) {
+                
+                alert("successfully retrieved " + results.length + "comments");
+                var comm = '';
+                if (results.length > 0) {        
+                    for (var i = results.length-1; i >= 0; i--) {
+                        comm += '<p>' + results[i].attributes.text + '</p>';           
+                    }
+                } else {
+                        comm ='<p>Be the first to comment.</p>';
+                    }
+
+                    $('.ppls-comments').html(comm);
+                
+            },
+            error: function(error) {
+                alert("Error: " + error.code + " " + error.message);
+            }
+        });
 }
 
-function showQuestionMap(qLatLong){
+function showQuestionMap(qLat, qLong){
+    var c = new google.maps.LatLng(qLat, qLong);
+    console.log(qLat, qLong);
     var mapOptions = {
         zoom: 16,
-        center: qLatLong,
-        disableDefaultUI: true
+        // center: [qLat, qLong],
+        center: c,
+        disableDefaultUI: true,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
     var map = new google.maps.Map(document.getElementById('question-map'),mapOptions);
 
     var marker = new google.maps.Marker({
-      position: qLatLong,
+      position: c,
       map: map,
       //title: 'Hello World!'
     });
 
     //console.log('question mapOptions: '+mapOptions);
+}
+
+function loadAllQuestions(){
+    // $('#pg-question-list').on('load', function(){
+    //navigator.geolocation.getCurrentPosition(onSuccess, onFail);
+        query.find({
+            success: function(results) {
+                
+                alert("successfully retrieved " + results.length + "questions");
+                
+                $('#question-list').html('');
+                for (var i = results.length-1; i >= 0; i--){
+                    var q = results[i];
+                    console.log("var q: ", q);
+                    $('#question-list').append(
+                        '<div class="question-area">\
+                            <div class="question-all" data-id="' + q.id + '">\
+                                <div class="question-all-text" data-id="' + q.id  + '">\
+                                    <h1>' + q.attributes.text + '</h1>\
+                                </div>\
+                                <div class="yes-and-no">\
+                                    <div class="yes">\
+                                    <a href="#" class="" data-id="' + q.id  + '">yes</a>\
+                                    </div>\
+                                    <div class="no">\
+                                    <a href="#" class="" data-id="' + q.id  + '">no</a>\
+                                    </div>\
+                                </div>\
+                                <div class="comment-count" data-id="' + q.id  + '">'+ q.attributes.comments +' comments</div>\
+                            </div>\
+                        </div>');
+                    if (i % 2 === 0){
+                        $('.question-area:nth-child(even)').addClass('area-white');
+                    } 
+                }
+            },
+            error: function(error) {
+                alert("Error: " + error.code + " " + error.message);
+            }
+        });             
 }
 
 

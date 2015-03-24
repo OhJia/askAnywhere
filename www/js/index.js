@@ -17,27 +17,33 @@ var par;
 
 function init(){
     //This will run when the page is ready
-    alert("init");  
+    // alert("init");  
 
-    loadAllQuestions();
+    
+    
     //Run device ready when phonegap is loaded
     document.addEventListener("deviceready", deviceReady, false);
 }
 
 function deviceReady() {
                 //Run any Phonegap specific code here
-    alert("deviceready");
+    // alert("device is ready");
+
+    // $(document).on("pageshow", "#pg-question-list", function(){
+    //     loadAllQuestions();
+    // });
 
     // start new question
     $('#question-new').click(function(){
         $('#pg-new-question').html(
-            '<form method="get" action="">\
+            '<div class="new-question-area">\
+            <form method="get" action="">\
                 <fieldset class="ui-field-contain">\
                     <label for="basicfield" class="ui-hidden-accessible">Your question</label>\
-                    <textarea id="my-question" placeholder="My question"></textarea>\
+                    <textarea id="my-question" placeholder="Type your question here"></textarea>\
                 </fieldset>\
-                <a href="#pg-question-location" id="question-button" class="ui-btn">next</a>\
-            </form>');
+                <a href="#pg-question-location" id="question-button" class="ui-btn btn-blue"><h1>next</h1></a>\
+            </form></div>');
     });
 
     $(document).on('click', '#question-button', function(){
@@ -47,7 +53,11 @@ function deviceReady() {
 
     //when #pg-question-location shows, get geolocation
     $(document).on("pageshow", "#pg-question-location", function(){
-        navigator.geolocation.getCurrentPosition(onSuccess, onFail);
+        navigator.geolocation.getCurrentPosition(function(position) {
+            onSuccess(position, 'map');
+        }, function(message) {
+            onFail(message);
+        });
     });
 
 
@@ -62,7 +72,7 @@ function deviceReady() {
             no: 0, 
             comments: 0          
         }).then(function(object) {
-            alert("yay! question " +question.id+ "saved.");
+            // alert("yay! question " +question.id+ "saved.");
         });        
         console.log(question);
     });
@@ -89,15 +99,24 @@ function deviceReady() {
                  $('#pg-question-single .question-details').html(
                     '<div id="question-map" data-id="' + qID + '"></div>\
                     <div class="question-single-all">\
-                        <h1>'+ results.attributes.text + '</h1>\
-                        <a href="#" class="yes ui-btn ui-btn-inline" data-id="' + qID + '">yes</a>\
-                        <a href="#" class="no ui-btn ui-btn-inline" data-id="' + qID + '">no</a>\
+                        <div class="question-all-text">\
+                            <span>'+ results.attributes.text + '</span>\
+                        </div>\
+                        <div class="yes-and-no">\
+                            <div class="yes" data-id="' + qID + '">\
+                            <a href="#" data-id="' + qID + '">' + results.attributes.yes + '</a>\
+                            </div>\
+                            <div class="no" data-id="' + qID + '">\
+                            <a href="#" data-id="' + qID + '">' + results.attributes.no + '</a>\
+                            </div>\
+                        </div>\
                     </div>\
                     <div class="comment-count"></div>\
+                    <div class="ppls-comments"></div>\
                     <div class="question-comments-area"></div>');
                  showQuestionMap(results.attributes.location.k, results.attributes.location.D);
-                 newComment(results.id);
                  showComments(resultQuestion);
+                 newComment(results.id);
             },
             error: function(object, error){
                 alert("Error: " + error.code + " " + error.message);
@@ -116,7 +135,7 @@ function deviceReady() {
             text: nComm,
             parent: resultQuestion        
         }).then(function(object) {
-            alert("yay! comment " +comment.attributes.text+ " saved.");
+            // alert("yay! comment " +comment.attributes.text+ " saved.");
         });   
         // add to # of comments
         resultQuestion.increment("comments");
@@ -131,21 +150,26 @@ function deviceReady() {
 
     // increase # of yes
     $(document).on('click', '.yes', function(){
+        console.log(this);
          var qID = $(this).attr('data-id');
          console.log(qID);
 
         var q = new Parse.Query(Question);
-
+        var count;
         q.get(qID, {
             success: function(results){
                 results.increment("yes");
                 results.save();
                 console.log(results);
+                count = results.attributes.yes;
+                console.log('count: '+count);
             },
             error: function(object, error){
                 alert("Error: " + error.code + " " + error.message);
             }
         });
+
+        $(this).append(count);
     });
 
     // increase # of no
@@ -154,12 +178,13 @@ function deviceReady() {
          console.log(qID);
 
         var q = new Parse.Query(Question);
-
+        var count;
         q.get(qID, {
             success: function(results){
                 results.increment("no");
                 results.save();
                 console.log(results);
+                count = results.attributes.no;
             },
             error: function(object, error){
                 alert("Error: " + error.code + " " + error.message);
@@ -170,8 +195,11 @@ function deviceReady() {
 }
 
 
-function onSuccess(position){
-    //console.log(position);
+function onSuccess(position, mapElement){
+    // default to #map
+    if (!mapElement) mapElement = "map";
+    
+    console.log(position, mapElement);
 
     var longitude = position.coords.longitude;
     var latitude = position.coords.latitude;
@@ -184,7 +212,7 @@ function onSuccess(position){
             mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
-    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    var map = new google.maps.Map(document.getElementById(mapElement), mapOptions);
 
     $('<div/>').addClass('centerMarker').appendTo(map.getDiv());
 
@@ -197,6 +225,7 @@ function onSuccess(position){
     //alert("Your location " + latLong);
 }
 
+
 function onFail(message){
     alert('code: ' + error.code + '\n' + 'message' + error.message + '\n');
 }
@@ -208,13 +237,13 @@ function updateLocation(position) {
 
 function newComment(index){
     $('#pg-question-single .question-comments-area').html(
-        '<div class="new-comment-field">\
+        '<div  data-role="footer" data-position="fixed" class="new-comment-field">\
             <form method="get" action="">\
-                <fieldset class="ui-field-contain">\
+                <fieldset class="ui-field-contain comment-box">\
                     <label for="basicfield" class="ui-hidden-accessible">Your comment</label>\
                     <textarea id="my-comment" placeholder="My comment"></textarea>\
                 </fieldset>\
-                <a href="#" id="comment-button" class="ui-btn"  data-index="' + index + '">submit</a>\
+                <a href="#" id="comment-button" data-index="' + index + '"><h1>submit</h1></a>\
            </form>\
             </div>\
         </div>');
@@ -226,7 +255,7 @@ function showComments(par){
         queryComm.find({
             success: function(results) {
                 
-                alert("successfully retrieved " + results.length + "comments");
+                // alert("successfully retrieved " + results.length + "comments");
                 var comm = '';
                 if (results.length > 0) {        
                     for (var i = results.length-1; i >= 0; i--) {
@@ -269,10 +298,19 @@ function showQuestionMap(qLat, qLong){
 
 function loadAllQuestions(){
     // $('#pg-question-list').on('load', function(){
+
+
+        navigator.geolocation.getCurrentPosition(function(position) {
+            onSuccess(position, 'map-all'); // map area element ID is #map-all
+        }, function(message) {
+            onFail(message);
+        });
+
+
         query.find({
             success: function(results) {
                 
-                alert("successfully retrieved " + results.length + "questions");
+                // alert("successfully retrieved " + results.length + "questions");
                 
                 $('#question-list').html('');
                 for (var i = results.length-1; i >= 0; i--){
@@ -282,15 +320,22 @@ function loadAllQuestions(){
                         '<div class="question-area">\
                             <div class="question-all" data-id="' + q.id + '">\
                                 <div class="question-all-text" data-id="' + q.id  + '">\
-                                    <h1>' + q.attributes.text + '</h1>\
+                                    <span>' + q.attributes.text + '</span>\
                                 </div>\
                                 <div class="yes-and-no">\
-                                    <a href="#" class="yes ui-btn ui-btn-inline" data-id="' + q.id  + '">yes</a>\
-                                    <a href="#" class="no ui-btn ui-btn-inline" data-id="' + q.id  + '">no</a>\
+                                    <div class="yes" data-id="' + q.id  + '">\
+                                    <a href="#" class="yes-text" data-id="' + q.id  + '">' + q.attributes.yes + '</a>\
+                                    </div>\
+                                    <div class="no" data-id="' + q.id  + '">\
+                                    <a href="#" class="no-text" data-id="' + q.id  + '">' + q.attributes.no + '</a>\
+                                    </div>\
                                 </div>\
                                 <div class="comment-count" data-id="' + q.id  + '">'+ q.attributes.comments +' comments</div>\
                             </div>\
                         </div>');
+                    if (i % 2 === 0){
+                        $('.question-area:nth-child(even)').addClass('area-white');
+                    } 
                 }
             },
             error: function(error) {
@@ -298,6 +343,7 @@ function loadAllQuestions(){
             }
         });             
 }
+
 
 
 

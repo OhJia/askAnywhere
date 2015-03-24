@@ -1,21 +1,4 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
@@ -69,6 +52,12 @@ body {
     }
 }
 
+p {
+    font-size: 18px;
+    text-transform: none;
+    text-shadow: none;
+}
+
 h1 {
     font-size:24px;
     font-weight:normal;
@@ -76,6 +65,7 @@ h1 {
     overflow:visible;
     padding:0px;
     text-align:center;
+    text-shadow: none;
 }
 
 .event {
@@ -97,6 +87,21 @@ h1 {
     display:none;
 }
 
+h1 {
+    font-family: 'GothamBold';
+}
+
+.question-all-text h2 {
+    font-family: 'CourierPrime-Bold';
+    text-transform: normal;
+    font-size: 24px;
+}
+
+.question-all-text h1 {
+    font-family: 'CourierPrime-Bold';
+    text-transform: normal;
+}
+
 @keyframes fade {
     from { opacity: 1.0; }
     50% { opacity: 0.4; }
@@ -114,19 +119,28 @@ h1 {
     -webkit-animation:fade 3000ms infinite;
 }
 
+.ui-content {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 #new-question {
     padding-top: 200px;
 }
 
-#map {
+#map, #map-all {
     width: 100%;
     min-height: 300px;
 }
+#map-all {
+    min-height: 100px;
+}
 
-#map .centerMarker{
+#map .centerMarker, #map-all .centerMarker {
   position:absolute;
   /*url of the marker*/
-  background:url(http://maps.gstatic.com/mapfiles/markers2/marker.png) no-repeat;
+  background:url(../img/marker.png) no-repeat;
+  background-size: cover;
   /*center the marker*/
   top:50%;left:50%;
   z-index:1;
@@ -134,12 +148,285 @@ h1 {
   margin-left:-10px;
   margin-top:-34px;
   /*size of the image*/
-  height:34px;
+  height:26px;
   width:20px;
   cursor:pointer;
 }
 
+#img-center-bunny {
+  /*position:absolute;*/
+  /*url of the marker*/
+  background:url(../img/ASKII-bunny.png) no-repeat;
+  background-size: cover;
+  /*center the marker*/
+  top:50%;left:50%;
+  z-index:1;
+  /*fix offset when needed*/
+  margin: 100px auto 0px auto;
+  /*size of the image*/
+  height:100px;
+  width:135px;
+  cursor:pointer;
+}
+
+#img-center-start {
+  background:url(../img/ASKII.png) no-repeat;
+  background-size: cover;
+  /*center the marker*/
+  top:50%;left:50%;
+  z-index:1;
+  /*fix offset when needed*/
+  margin: 100px auto 0px auto;
+  /*size of the image*/
+  height:150px;
+  width:180px;
+  cursor:pointer;
+
+}
+
 #question-map {
-    height: 100px;
+    height: 180px;
     width: 100%;
 }
+
+#pg-start {
+    background-color: #85f9e8;
+}
+
+#pg-start img{
+    display: block;
+    margin: 200px auto 0px auto;
+    width: 180px;
+}
+
+.ui-btn {
+    height: 40px;
+}
+
+.btn-yellow {
+    background-color: #f4ea17;
+    margin: 60px 50px 0px 50px;
+    padding-top: 25px;
+}
+
+.btn-blue {
+    border: none;
+    margin: 60px 50px 0px 50px;
+    padding-top: 25px;
+}
+
+.btn-gray {
+    border: none;
+    background-color: #cccccc;
+    margin: 60px 50px 0px 50px;
+    padding-top: 25px;
+}
+
+.btn-blue-bottom {
+    border: none;
+    margin: 10px 50px 0px 50px;
+    padding-top: 25px;
+}
+
+/*.ui-page-theme-a {
+    background-color: transparent;
+}*/
+
+.ui-footer-fixed {
+    background-color: #27268d;
+    height: 100px;
+}
+
+div.ui-footer {
+    background-color: #27268d;
+}
+
+#question-new {
+    background-color: #85f9e8;
+    border: none;
+    display: block;
+}
+
+#question-new h1 {
+    color: #fff;
+    padding-top: 20px;
+}
+#ask-around {
+    background-color: #ccc;
+}
+#ask-around h1 {
+    color: #fff;
+}
+
+.footer-blue {
+    background-color: #85f9e8 !important;
+}
+
+.question-area {
+    min-height: 120px;
+}
+
+.question-all {
+    padding-top: 20px;
+    min-height: 100px;
+}
+
+.question-all-text {
+    width: 70%;
+    display: inline-block;
+    padding-left: 20px;
+    min-height: 60px;
+}
+
+.comment-count {
+    padding-left: 20px;
+}
+
+.question-all-text h1 {
+    text-align: left;
+}
+
+.yes-and-no {
+    float: right;
+    padding-right: 30px;
+}
+
+.yes {
+    width: 40px;
+    height: 40px;
+    background-color: #85f9e8;
+    border-radius: 50%;
+    margin-bottom: 8px;
+}
+
+.no {
+    width: 40px;
+    height: 40px;
+    background-color: #cccccc;
+    border-radius: 50%;
+}
+
+.yes a {
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    padding-top: 12px;
+    color: #000;
+}
+
+.no a {
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    padding-top: 12px;
+    color: #000;
+}
+
+.area-white {
+    background-color: #fff;
+}
+
+.header-single {
+    height: 50px;
+}
+
+.header-single a {
+  /*url of the marker*/
+  background:url(../img/close.png) no-repeat;
+  background-size: cover;
+  /*center the marker*/
+  top:50%;left:50%;
+  /*fix offset when needed*/
+  margin-right:20px;
+  margin-top:10px;
+  /*size of the image*/
+  height:26px;
+  width:26px;
+  cursor:pointer;
+  float: right;
+}
+
+.question-single-all {
+    padding-top: 40px;
+    min-height: 120px;
+    border-bottom: 0.5px solid;
+}
+
+.ppls-comments {
+    padding-left: 20px;
+}
+
+.ui-field-contain {
+    display: inline-block !important;
+}
+
+#comment-button h1{
+    text-decoration: none;
+    color: #000;
+    font-size: 20px;
+    float: right;
+    padding-top: 32px;
+}
+
+.new-comment-field {
+    padding: 0px 20px;
+    background-color: #f2f2f2;
+}
+
+#my-comment {
+    border: none;
+    font-size: 18px;
+    width: 80%;
+    border-radius: 0%;
+    padding-top: 20px;
+    padding-left: 20px;
+}
+
+#pg-new-question {
+    background-color: #85f9e8;
+}
+
+#my-question {
+    background-color: #85f9e8;
+    border: none;
+    box-shadow: none;
+    font-family: 'CourierPrime-Bold';
+    text-transform: none;
+    font-size: 30px;
+    text-shadow: none;
+}
+
+.question-all-text span {
+    font-family: 'CourierPrime-Bold';
+    text-transform: none;
+    font-size: 24px;
+    text-shadow: none;
+}
+
+.new-question-area {
+    padding: 60px 20px 0px 20px; 
+}
+
+.new-question-area .ui-field-contain {
+    min-height: 150px;
+}
+
+#pg-question-location {
+    background-color: #85f9e8;
+}
+
+.question-instruction p {
+    text-align: center;
+    padding-left: 80px;
+    padding-right: 80px;
+}
+
+#pg-question-complete {
+    background-color: #85f9e8;
+}
+
+.comment-box {
+    width: 70%;
+}
+
+
