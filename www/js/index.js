@@ -1,4 +1,4 @@
-Parse.initialize("key", "key);
+Parse.initialize("key", "key");
 
 
 var questionText; //a single question's text
