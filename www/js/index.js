@@ -1,4 +1,4 @@
-Parse.initialize("Ljr2dQpbEZnH3mw1RImWBlsiFWdZzB7eUyuEZGms", "GcX4fuwjHRIS7ArKy0sie6szsMguAs7MgLYqwgLi");
+Parse.initialize("key", "key);
 
 
 var questionText; //a single question's text
